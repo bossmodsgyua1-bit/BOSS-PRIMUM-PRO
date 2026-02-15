@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOSS PREMIUM PRO | ELITE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@600;700&display=swap');
+
+:root {
+  --neon: #00f2ff;
+  --glow: #7000ff;
+  --dark-glass: rgba(10, 10, 15, 0.9);
+}
+
+body {
+  margin: 0; padding: 0;
+  background: #000;
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* --- CYBER GRID BACKGROUND --- */
+#bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.6; }
+
+/* --- PREMIUM LOGIN CARD --- */
+.login-container {
+  position: relative;
+  width: 400px;
+  background: var(--dark-glass);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(0, 242, 255, 0.1);
+  padding: 40px;
+  box-shadow: 0 50px 100px rgba(0,0,0,1);
+  overflow: hidden;
+  animation: slideUp 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* --- GLITCH TITLE (SINGLE LINE) --- */
+.title-wrap {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.glitch-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.glitch-text::before {
+  content: "BOSS PREMIUM PRO";
+  position: absolute;
+  left: -2px; text-shadow: 2px 0 #ff00ff;
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(10px, 9999px, 20px, 0); }
+  20% { clip: rect(30px, 9999px, 40px, 0); }
+  100% { clip: rect(10px, 9999px, 50px, 0); }
+}
+
+/* --- FORM STYLING --- */
+.input-group {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.input-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: none;
+  border-bottom: 2px solid #333;
+  padding: 12px 0;
+  color: var(--neon);
+  font-family: 'Orbitron';
+  font-size: 14px;
+  transition: 0.4s;
+  outline: none;
+}
+
+.input-group label {
+  position: absolute;
+  top: 12px; left: 0;
+  color: #666;
+  pointer-events: none;
+  transition: 0.4s;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.input-group input:focus ~ label,
+.input-group input:valid ~ label {
+  top: -15px;
+  font-size: 10px;
+  color: var(--neon);
+}
+
+.input-group input:focus {
+  border-bottom: 2px solid var(--neon);
+}
+
+/* --- ELITE BUTTON --- */
+.auth-btn {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  border: 1px solid var(--neon);
+  color: var(--neon);
+  font-family: 'Orbitron';
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: 0.5s;
+}
+
+.auth-btn:hover {
+  background: var(--neon);
+  color: #000;
+  box-shadow: 0 0 30px var(--neon);
+}
+
+/* --- PREDICTOR UI --- */
+.res-display {
+  padding: 30px;
+  background: rgba(0, 242, 255, 0.05);
+  border-radius: 15px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(0, 242, 255, 0.2);
+}
+
+#resType { font-family: 'Orbitron'; font-size: 20px; letter-spacing: 5px; }
+#resNum { font-size: 90px; font-weight: 900; line-height: 1; margin: 10px 0; }
+
+.hidden { display: none; }
+#status { font-size: 11px; color: #ff3e3e; height: 20px; text-align: center; }
+
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="login-container" id="loginBox">
+  <div class="title-wrap">
+    <div class="glitch-text">BOSS PREMIUM PRO</div>
+  </div>
+  <div id="status"></div>
+  <div class="input-group">
+    <input type="text" id="vKey" required>
+    <label>Access License Key</label>
+  </div>
+  <button class="auth-btn" onclick="auth()">AUTHENTICATE SYSTEM</button>
+</div>
+
+<div class="login-container hidden" id="predictBox">
+  <div class="title-wrap">
+    <div class="glitch-text" style="font-size: 18px;">PREDICTOR ACTIVE</div>
+  </div>
+  <div class="res-display">
+    <div id="resType">READY</div>
+    <div id="resNum">--</div>
+  </div>
+  <div class="input-group">
+    <input type="number" id="pId" required>
+    <label>Enter Period Number</label>
+  </div>
+  <button class="auth-btn" onclick="run()">ANALYZE DATA</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+<script>
+// --- Background ---
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+let particles = Array(80).fill().map(() => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*1.5, v: Math.random()*0.5}));
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#00f2ff";
+  particles.forEach(p => { ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fill(); p.y -= p.v; if(p.y < 0) p.y = canvas.height; });
+  requestAnimationFrame(draw);
+}
+draw();
+
+// --- Firebase ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDuKTMnOtmvTllIDfftwyjXOnWM_RhmP40",
+  authDomain: "bosspvt-5a4a3.firebaseapp.com",
+  databaseURL: "https://bosspvt-5a4a3-default-rtdb.firebaseio.com",
+  projectId: "bosspvt-5a4a3",
+  storageBucket: "bosspvt-5a4a3.firebasestorage.app",
+  messagingSenderId: "1041558574897",
+  appId: "1:1041558574897:android:fa523a13cf99030c0e4210"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const pool = [
+  {t: "BIG", n: 7}, {t: "SMALL", n: 0}, {t: "SMALL", n: 1},
+  {t: "BIG", n: 9}, {t: "BIG", n: 8}, {t: "SMALL", n: 2},
+  {t: "SMALL", n: 1}, {t: "BIG", n: 5}, {t: "SMALL", n: 4},
+  {t: "SMALL", n: 3}, {t: "BIG", n: 6}, {t: "BIG", n: 7}
+];
+
+function auth() {
+  const k = document.getElementById('vKey').value;
+  db.ref('keys/'+k).once('value').then(s => {
+    if(s.exists()) {
+      document.getElementById('loginBox').classList.add('hidden');
+      document.getElementById('predictBox').classList.remove('hidden');
+    } else {
+      document.getElementById('status').innerText = "ERROR: INVALID LICENSE";
+    }
+  });
+}
+
+function run() {
+  if(!document.getElementById('pId').value) return alert("Enter Period");
+  const rt = document.getElementById('resType');
+  const rn = document.getElementById('resNum');
+  rt.innerText = "WAIT...";
+  let i = 0;
+  const loop = setInterval(() => {
+    rn.innerText = Math.floor(Math.random()*10);
+    i++;
+    if(i > 15) {
+      clearInterval(loop);
+      const res = pool[Math.floor(Math.random()*pool.length)];
+      rt.innerText = res.t;
+      rn.innerText = res.n;
+      rt.style.color = (res.t === "BIG") ? "#ff00ff" : "#00f2ff";
+      rn.style.textShadow = (res.t === "BIG") ? "0 0 30px #ff00ff" : "0 0 30px #00f2ff";
+    }
+  }, 80);
+}
+</script>
+</body>
+</html>
